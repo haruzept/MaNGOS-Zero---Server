@@ -32,6 +32,9 @@
 #include <iomanip>
 #include <cctype>
 #include <cstring>
+#include <cstdlib>
+#include <string_view>
+#include <utility>
 
 //////////////////////////////////////////////////////////////////////////
 int32 irand(int32 min, int32 max)
@@ -76,28 +79,39 @@ float rand_chance_f(void)
 
 Tokens StrSplit(const std::string& src, const std::string& sep)
 {
-    Tokens r;
-    std::string s;
-    for (std::string::const_iterator i = src.begin(); i != src.end(); ++i)
+    Tokens result;
+
+    if (src.empty())
     {
-        if (sep.find(*i) != std::string::npos)
+        return result;
+    }
+
+    const std::string_view separators(sep);
+    std::string current;
+    current.reserve(src.size());
+
+    for (char ch : src)
+    {
+        if (separators.find(ch) != std::string_view::npos)
         {
-            if (s.length())
+            if (!current.empty())
             {
-                r.push_back(s);
+                result.emplace_back(current);
+                current.clear();
             }
-            s = "";
         }
         else
         {
-            s += *i;
+            current.push_back(ch);
         }
     }
-    if (s.length())
+
+    if (!current.empty())
     {
-        r.push_back(s);
+        result.emplace_back(std::move(current));
     }
-    return r;
+
+    return result;
 }
 
 uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index)
@@ -107,7 +121,7 @@ uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index)
         return 0;
     }
 
-    return (uint32)atoi(data[index].c_str());
+    return static_cast<uint32>(std::strtoul(data[index].c_str(), nullptr, 10));
 }
 
 float GetFloatValueFromArray(Tokens const& data, uint16 index)
@@ -121,14 +135,14 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index)
 
 void stripLineInvisibleChars(std::string& str)
 {
-    static std::string invChars = " \t\7\n";
+    constexpr std::string_view invisibleCharacters = " \t\7\n";
 
     size_t wpos = 0;
-
     bool space = false;
-    for (size_t pos = 0; pos < str.size(); ++pos)
+
+    for (char ch : str)
     {
-        if (invChars.find(str[pos]) != std::string::npos)
+        if (invisibleCharacters.find(ch) != std::string_view::npos)
         {
             if (!space)
             {
@@ -138,22 +152,12 @@ void stripLineInvisibleChars(std::string& str)
         }
         else
         {
-            if (wpos != pos)
-            {
-                str[wpos++] = str[pos];
-            }
-            else
-            {
-                ++wpos;
-            }
+            str[wpos++] = ch;
             space = false;
         }
     }
 
-    if (wpos < str.size())
-    {
-        str.erase(wpos, str.size());
-    }
+    str.resize(wpos);
 }
 
 /**
@@ -358,16 +362,16 @@ uint32 TimeStringToSecs(const std::string& timestring)
     uint32 buffer     = 0;
     uint32 multiplier = 0;
 
-    for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr)
+    for (char ch : timestring)
     {
-        if (isdigit(*itr))
+        if (std::isdigit(static_cast<unsigned char>(ch)))
         {
             buffer *= 10;
-            buffer += (*itr) - '0';
+            buffer += ch - '0';
         }
         else
         {
-            switch (*itr)
+            switch (ch)
             {
                 case 'd': multiplier = DAY;     break;
                 case 'h': multiplier = HOUR;    break;
@@ -421,12 +425,8 @@ std::string GetAddressString(ACE_INET_Addr const& addr)
 
 bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask)
 {
-    uint32 mask = subnetMask.get_ip_address();
-    if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
-    {
-        return true;
-    }
-    return false;
+    const auto mask = subnetMask.get_ip_address();
+    return (net.get_ip_address() & mask) == (addr.get_ip_address() & mask);
 }
 
 /// create PID file
