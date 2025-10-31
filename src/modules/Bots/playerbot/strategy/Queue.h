@@ -1,4 +1,6 @@
 #include "ActionBasket.h"
+#include <cstddef>
+#include <list>
 
 #pragma once
 namespace ai
@@ -6,15 +8,13 @@ namespace ai
 class Queue
 {
 public:
-    Queue(void) {}
-public:
-    ~Queue(void) {}
-public:
+    Queue() = default;
+    ~Queue() = default;
     void Push(ActionBasket *action);
     void Push(ActionBasket **actions);
     ActionNode* Pop();
     ActionBasket* Peek();
-    int Size();
+    std::size_t Size() const;
 private:
     std::list<ActionBasket*> actions;
 };
