@@ -5,18 +5,15 @@
 
 using namespace ai;
 
-int NextAction::size(NextAction** actions)
+std::size_t NextAction::size(NextAction** actions)
 {
     if (!actions)
     {
         return 0;
     }
 
-    int size;
-    for (size=0; size<10 && actions[size]; )
-    {
-        size++;
-    }
+    std::size_t size = 0;
+    for (; size < 10 && actions[size]; ++size) {}
     return size;
 }
 
@@ -24,35 +21,35 @@ NextAction** NextAction::clone(NextAction** actions)
 {
     if (!actions)
     {
-        return NULL;
+        return nullptr;
     }
 
-    int size = NextAction::size(actions);
+    const auto size = NextAction::size(actions);
 
     NextAction** res = new NextAction*[size + 1];
-    for (int i=0; i<size; i++)
+    for (std::size_t i = 0; i < size; ++i)
     {
         res[i] = new NextAction(*actions[i]);
     }
-    res[size] = NULL;
+    res[size] = nullptr;
     return res;
 }
 
 NextAction** NextAction::merge(NextAction** left, NextAction** right)
 {
-    int leftSize = NextAction::size(left);
-    int rightSize = NextAction::size(right);
+    const auto leftSize = NextAction::size(left);
+    const auto rightSize = NextAction::size(right);
 
     NextAction** res = new NextAction*[leftSize + rightSize + 1];
-    for (int i=0; i<leftSize; i++)
+    for (std::size_t i = 0; i < leftSize; ++i)
     {
         res[i] = new NextAction(*left[i]);
     }
-    for (int i=0; i<rightSize; i++)
+    for (std::size_t i = 0; i < rightSize; ++i)
     {
         res[leftSize + i] = new NextAction(*right[i]);
     }
-    res[leftSize + rightSize] = NULL;
+    res[leftSize + rightSize] = nullptr;
 
     NextAction::destroy(left);
     NextAction::destroy(right);
@@ -65,8 +62,8 @@ NextAction** NextAction::array(uint8 _nil, ...)
     va_list vl;
     va_start(vl, _nil);
 
-    int size = 0;
-    NextAction* cur = NULL;
+    std::size_t size = 0;
+    NextAction* cur = nullptr;
     do
     {
         cur = va_arg(vl, NextAction*);
@@ -78,7 +75,7 @@ NextAction** NextAction::array(uint8 _nil, ...)
 
     NextAction** res = new NextAction*[size];
     va_start(vl, _nil);
-    for (int i=0; i<size; i++)
+    for (std::size_t i = 0; i < size; ++i)
     {
         res[i] = va_arg(vl, NextAction*);
     }
@@ -94,7 +91,7 @@ void NextAction::destroy(NextAction** actions)
         return;
     }
 
-    for (int i=0; i<10 && actions[i]; i++)
+    for (std::size_t i = 0; i < 10 && actions[i]; ++i)
     {
         delete actions[i];
     }

@@ -8,66 +8,67 @@ using namespace ai;
 
 void Queue::Push(ActionBasket *action)
 {
-    if (action)
+    if (!action)
     {
-        for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
-        {
-            ActionBasket* basket = *iter;
-            if (action->getAction()->getName() == basket->getAction()->getName())
-            {
-                if (basket->getRelevance() < action->getRelevance())
-                {
-                    basket->setRelevance(action->getRelevance());
-                }
-                delete action;
-                return;
-            }
-        }
-        actions.push_back(action);
+        return;
     }
+
+    for (auto* basket : actions)
+    {
+        if (action->getAction()->getName() == basket->getAction()->getName())
+        {
+            if (basket->getRelevance() < action->getRelevance())
+            {
+                basket->setRelevance(action->getRelevance());
+            }
+            delete action;
+            return;
+        }
+    }
+    actions.push_back(action);
 }
 
 void Queue::Push(ActionBasket **actions)
 {
-    if (actions)
+    if (!actions)
     {
-        for (int i=0; i<sizeof(actions)/sizeof(ActionBasket*); i++)
-        {
-            Push(actions[i]);
-        }
+        return;
+    }
+
+    for (ActionBasket** action = actions; *action != nullptr; ++action)
+    {
+        Push(*action);
     }
 }
 
 ActionNode* Queue::Pop()
 {
-    float max = -1;
-    ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    float max = -1.0f;
+    ActionBasket* selection = nullptr;
+    for (auto* basket : actions)
     {
-        ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)
         {
             max = basket->getRelevance();
             selection = basket;
         }
     }
-    if (selection != NULL)
+    if (selection != nullptr)
     {
         ActionNode* action = selection->getAction();
         actions.remove(selection);
         delete selection;
         return action;
     }
-    return NULL;
+    return nullptr;
 }
 
 ActionBasket* Queue::Peek()
 {
-    float max = -1;
-    ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    float max = -1.0f;
+    ActionBasket* selection = nullptr;
+    for (auto* basket : actions)
     {
-        ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)
         {
             max = basket->getRelevance();
@@ -77,7 +78,7 @@ ActionBasket* Queue::Peek()
     return selection;
 }
 
-int Queue::Size()
+std::size_t Queue::Size() const
 {
     return actions.size();
 }
