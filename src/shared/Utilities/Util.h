@@ -45,7 +45,7 @@ enum class TimeFormat : uint8
  * @brief
  *
  */
-typedef std::vector<std::string> Tokens;
+using Tokens = std::vector<std::string>;
 
 /**
  * @brief
