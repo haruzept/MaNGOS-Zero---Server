@@ -19,7 +19,7 @@ namespace ai
     template <class T> class NamedObjectFactory
     {
     protected:
-        typedef T* (*ActionCreator) (PlayerbotAI* ai);
+        using ActionCreator = T* (*)(PlayerbotAI* ai);
         map<string, ActionCreator> creators;
 
     public:
@@ -35,13 +35,13 @@ namespace ai
 
             if (creators.find(name) == creators.end())
             {
-                return NULL;
+                return nullptr;
             }
 
             ActionCreator creator = creators[name];
             if (!creator)
             {
-                return NULL;
+                return nullptr;
             }
 
             T *object = (*creator)(ai);
@@ -168,7 +168,7 @@ namespace ai
                 T* object = (*i)->create(name, ai);
                 if (object) return object;
             }
-            return NULL;
+            return nullptr;
         }
 
         void Update()
@@ -272,7 +272,7 @@ namespace ai
                 T* object = (*i)->create(name, ai);
                 if (object) return object;
             }
-            return NULL;
+            return nullptr;
         }
 
     private:
