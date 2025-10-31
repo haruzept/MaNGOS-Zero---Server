@@ -45,7 +45,7 @@ class ObjectRegistry
          * @brief
          *
          */
-        typedef std::map<Key, T*> RegistryMapType;
+        using RegistryMapType = std::map<Key, T*>;
 
         /**
          * @brief Returns a registry item
@@ -55,8 +55,8 @@ class ObjectRegistry
          */
         const T* GetRegistryItem(Key key) const
         {
-            typename RegistryMapType::const_iterator iter = i_registeredObjects.find(key);
-            return(iter == i_registeredObjects.end() ? NULL : iter->second);
+            const auto iter = i_registeredObjects.find(key);
+            return iter == i_registeredObjects.end() ? nullptr : iter->second;
         }
 
         /**
@@ -69,7 +69,7 @@ class ObjectRegistry
          */
         bool InsertItem(T* obj, Key key, bool replace = false)
         {
-            typename RegistryMapType::iterator iter = i_registeredObjects.find(key);
+            auto iter = i_registeredObjects.find(key);
             if (iter != i_registeredObjects.end())
             {
                 if (!replace)
@@ -92,7 +92,7 @@ class ObjectRegistry
          */
         void RemoveItem(Key key, bool delete_object = true)
         {
-            typename RegistryMapType::iterator iter = i_registeredObjects.find(key);
+            auto iter = i_registeredObjects.find(key);
             if (iter != i_registeredObjects.end())
             {
                 if (delete_object)
@@ -124,9 +124,9 @@ class ObjectRegistry
         {
             unsigned int sz = l.size();
             l.resize(sz + i_registeredObjects.size());
-            for (typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+            for (const auto& entry : i_registeredObjects)
             {
-                l[sz++] = iter->first;
+                l[sz++] = entry.first;
             }
             return i_registeredObjects.size();
         }
@@ -156,9 +156,9 @@ class ObjectRegistry
          */
         ~ObjectRegistry()
         {
-            for (typename RegistryMapType::iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+            for (auto& entry : i_registeredObjects)
             {
-                delete iter->second;
+                delete entry.second;
             }
             i_registeredObjects.clear();
         }
