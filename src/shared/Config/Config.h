@@ -29,6 +29,8 @@
 #include <Policies/Singleton.h>
 #include "Platform/Define.h"
 
+#include <memory>
+
 class ACE_Configuration_Heap;
 
 /**
@@ -48,6 +50,11 @@ class Config
          *
          */
         ~Config();
+
+        Config(const Config&) = delete;
+        Config& operator=(const Config&) = delete;
+        Config(Config&&) = delete;
+        Config& operator=(Config&&) = delete;
 
         /**
          * @brief
@@ -70,7 +77,7 @@ class Config
          * @param def
          * @return std::string
          */
-        std::string GetStringDefault(const char* name, const char* def);
+        [[nodiscard]] std::string GetStringDefault(const char* name, const char* def);
         /**
          * @brief
          *
@@ -78,7 +85,7 @@ class Config
          * @param def
          * @return bool
          */
-        bool GetBoolDefault(const char* name, const bool def = false);
+        [[nodiscard]] bool GetBoolDefault(const char* name, const bool def = false);
         /**
          * @brief
          *
@@ -86,7 +93,7 @@ class Config
          * @param def
          * @return int32
          */
-        int32 GetIntDefault(const char* name, const int32 def);
+        [[nodiscard]] int32 GetIntDefault(const char* name, const int32 def);
         /**
          * @brief
          *
@@ -94,19 +101,19 @@ class Config
          * @param def
          * @return float
          */
-        float GetFloatDefault(const char* name, const float def);
+        [[nodiscard]] float GetFloatDefault(const char* name, const float def);
 
         /**
          * @brief
          *
          * @return std::string
          */
-        std::string GetFilename() const { return mFilename; }
+        [[nodiscard]] std::string GetFilename() const { return mFilename; }
 
     private:
 
         std::string mFilename; /**< TODO */
-        ACE_Configuration_Heap* mConf; /**< TODO */
+        std::unique_ptr<ACE_Configuration_Heap> mConf; /**< TODO */
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()
