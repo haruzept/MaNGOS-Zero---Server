@@ -29,22 +29,22 @@
 
 INSTANTIATE_SINGLETON_1(Config);
 
-static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_TString& result)
+static bool GetValueHelper(ACE_Configuration_Heap* config, const char* name, ACE_TString& result)
 {
-    if (!mConf)
+    if (!config)
     {
         return false;
     }
 
     ACE_TString section_name;
     ACE_Configuration_Section_Key section_key;
-    ACE_Configuration_Section_Key root_key = mConf->root_section();
+    ACE_Configuration_Section_Key root_key = config->root_section();
 
     int i = 0;
-    while (mConf->enumerate_sections(root_key, i, section_name) == 0)
+    while (config->enumerate_sections(root_key, i, section_name) == 0)
     {
-        mConf->open_section(root_key, section_name.c_str(), 0, section_key);
-        if (mConf->get_string_value(section_key, name, result) == 0)
+        config->open_section(root_key, section_name.c_str(), 0, section_key);
+        if (config->get_string_value(section_key, name, result) == 0)
         {
             return true;
         }
@@ -54,15 +54,9 @@ static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_
     return false;
 }
 
-Config::Config()
-    : mConf(NULL)
-{
-}
+Config::Config() = default;
 
-Config::~Config()
-{
-    delete mConf;
-}
+Config::~Config() = default;
 
 bool Config::SetSource(const char* file)
 {
@@ -73,8 +67,7 @@ bool Config::SetSource(const char* file)
 
 bool Config::Reload()
 {
-    delete mConf;
-    mConf = new ACE_Configuration_Heap;
+    mConf = std::unique_ptr<ACE_Configuration_Heap>(new ACE_Configuration_Heap);
 
     if (mConf->open() == 0)
     {
@@ -85,21 +78,20 @@ bool Config::Reload()
         }
     }
 
-    delete mConf;
-    mConf = NULL;
+    mConf.reset();
     return false;
 }
 
 std::string Config::GetStringDefault(const char* name, const char* def)
 {
     ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? val.c_str() : def;
+    return GetValueHelper(mConf.get(), name, val) ? val.c_str() : def;
 }
 
 bool Config::GetBoolDefault(const char* name, bool def)
 {
     ACE_TString val;
-    if (!GetValueHelper(mConf, name, val))
+    if (!GetValueHelper(mConf.get(), name, val))
     {
         return def;
     }
@@ -120,11 +112,11 @@ bool Config::GetBoolDefault(const char* name, bool def)
 int32 Config::GetIntDefault(const char* name, int32 def)
 {
     ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
+    return GetValueHelper(mConf.get(), name, val) ? atoi(val.c_str()) : def;
 }
 
 float Config::GetFloatDefault(const char* name, float def)
 {
     ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? (float)atof(val.c_str()) : def;
+    return GetValueHelper(mConf.get(), name, val) ? (float)atof(val.c_str()) : def;
 }
