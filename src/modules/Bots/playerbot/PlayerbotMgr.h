@@ -10,7 +10,7 @@ class Unit;
 class Object;
 class Item;
 
-typedef UNORDERED_MAP<uint64, Player*> PlayerBotMap;
+using PlayerBotMap = UNORDERED_MAP<uint64, Player*>;
 
 class MANGOS_DLL_SPEC PlayerbotHolder : public PlayerbotAIBase
 {
@@ -30,7 +30,7 @@ public:
     void LogoutAllBots();
     void OnBotLogin(Player * const bot);
 
-    list<string> HandlePlayerbotCommand(char* args, Player* master = NULL);
+    list<string> HandlePlayerbotCommand(char* args, Player* master = nullptr);
     bool ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId);
     uint32 GetAccountId(string name);
 

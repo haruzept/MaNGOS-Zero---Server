@@ -2,8 +2,8 @@
 
 using namespace std;
 
-typedef set<uint32> ItemIds;
-typedef set<uint32> SpellIds;
+using ItemIds = set<uint32>;
+using SpellIds = set<uint32>;
 
 namespace ai
 {
